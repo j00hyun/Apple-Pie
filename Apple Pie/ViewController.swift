@@ -7,12 +7,13 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITextFieldDelegate {
 
     var listOfWords = ["buccaneer", "swift", "glorious", "incandescent", "bug", "program"] // 게임 단어 목록
     let incorrectMovesAllowed = 7 // 남은 기회
     var totalWins = 0 { // 맞춘 단어 수
         didSet {
+            totalScores[currPlayer] += currentGame.incorrectMovesRemaining
             newRound()
         }
     }
@@ -27,6 +28,7 @@ class ViewController: UIViewController {
     
     @IBOutlet var treeImageView: UIImageView!
     @IBOutlet var correctWordLabel: UILabel!
+    @IBOutlet var textField: UITextField!
     @IBOutlet var scoreLabel: UILabel!
     
     @IBOutlet var players: [UILabel]!
@@ -57,6 +59,10 @@ class ViewController: UIViewController {
         }
         
         players[currPlayer].backgroundColor = .yellow
+        
+        // 키보드
+        textField.resignFirstResponder() // 키보드 숨김
+        textField.text = ""
     }
     
     // 새로운 라운드 세팅
@@ -77,7 +83,8 @@ class ViewController: UIViewController {
         let letterString = sender.configuration!.title!
         let letter = Character(letterString.lowercased())
         
-        if currentGame.playerGuessed(letter: letter) { // 올바른 알파벳을 선택한 경우 점수 상승
+        // 올바른 알파벳을 선택한 경우 점수 상승
+        if currentGame.playerGuessed(letter: letter) {
             totalScores[currPlayer] += 1
         } else { // 틀렸을 경우 플레이어 차례 변경
             turnPlayer()
@@ -95,10 +102,10 @@ class ViewController: UIViewController {
     
     // 현재 라운드 상태 파악
     func updateGameState() {
-        if currentGame.incorrectMovesRemaining == 0 { // 남은 기회가 없을 경우 다음 라운드 진행
+        // 남은 기회가 없을 경우 다음 라운드 진행
+        if currentGame.incorrectMovesRemaining == 0 {
             totalLosses += 1
         } else if currentGame.word == currentGame.formattedWord { // 단어를 맞췄을 경우 맞춘 플레이어 점수 상승, 다음 라운드 진행
-            totalScores[currPlayer] += currentGame.incorrectMovesRemaining
             totalWins += 1
         } else { // 현재 라운드 계속 진행
             updateUI()
@@ -112,6 +119,27 @@ class ViewController: UIViewController {
         if currPlayer >= totalScores.count {
             currPlayer = 0
         }
+    }
+    
+    // 단어 텍스트필드에 입력후 리턴 누르면 실행
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        let myAnswer = textField.text!.lowercased()
+        
+        // 입력한 단어가 정답이면 _ 개수만큼 점수 상승
+        if currentGame.playerGuessed(word: myAnswer) {
+            for letter in currentGame.formattedWord {
+                if letter == "_" {
+                    totalScores[currPlayer] += 1
+                }
+            }
+            
+            totalWins += 1
+        } else {
+            turnPlayer()
+            updateUI()
+        }
+        
+        return true
     }
 }
 

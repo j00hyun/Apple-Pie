@@ -39,4 +39,14 @@ struct Game {
         
         return true
     }
+    
+    // 플레이어가 단어 입력 시 정답인지 확인 
+    mutating func playerGuessed(word: String) -> Bool {
+        if self.word != word {
+            incorrectMovesRemaining -= 1
+            return false
+        }
+        
+        return true
+    }
 }
