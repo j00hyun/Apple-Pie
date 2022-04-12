@@ -21,6 +21,7 @@ class ViewController: UIViewController {
             newRound()
         }
     }
+    var totalScores = 0
     var currentGame: Game!
     
     @IBOutlet var treeImageView: UIImageView!
@@ -37,21 +38,22 @@ class ViewController: UIViewController {
     func updateUI() {
         let letters = currentGame.formattedWord.map { String($0) }
         let wordWithSpacing = letters.joined(separator: " ")
-        
         correctWordLabel.text = wordWithSpacing
-        scoreLabel.text = "Wins: \(totalWins), Losses: \(totalLosses)"
+        
+        let currScores = totalScores + currentGame.score
+        scoreLabel.text = "Wins: \(totalWins), Losses: \(totalLosses), Scores: \(currScores)"
         treeImageView.image = UIImage(named: "Tree \(currentGame.incorrectMovesRemaining)")
     }
     
     func newRound() {
         if !listOfWords.isEmpty {
             let newWord = listOfWords.removeFirst()
-            currentGame = Game(word: newWord, incorrectMovesRemaining: incorrectMovesAllowed, guessedLetters: [])
+            currentGame = Game(word: newWord, incorrectMovesRemaining: incorrectMovesAllowed, score: 0, guessedLetters: [])
             enableLetterButtons(true)
-            updateUI()
         } else {
             enableLetterButtons(false)
         }
+        updateUI()
     }
     
     @IBAction func letterButtonPressed(_ sender: UIButton) {
@@ -70,8 +72,10 @@ class ViewController: UIViewController {
     
     func updateGameState() {
         if currentGame.incorrectMovesRemaining == 0 {
+            totalScores += currentGame.score
             totalLosses += 1
         } else if currentGame.word == currentGame.formattedWord {
+            totalScores += currentGame.score + 10
             totalWins += 1
         } else {
             updateUI()
