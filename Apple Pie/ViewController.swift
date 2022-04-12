@@ -21,12 +21,15 @@ class ViewController: UIViewController {
             newRound()
         }
     }
-    var totalScores = 0
+    var totalScores = [0, 0]
     var currentGame: Game!
+    var currPlayer = 0
     
     @IBOutlet var treeImageView: UIImageView!
     @IBOutlet var correctWordLabel: UILabel!
     @IBOutlet var scoreLabel: UILabel!
+    
+    @IBOutlet var players: [UILabel]!
     
     @IBOutlet var letterButtons: [UIButton]!
     
@@ -40,15 +43,21 @@ class ViewController: UIViewController {
         let wordWithSpacing = letters.joined(separator: " ")
         correctWordLabel.text = wordWithSpacing
         
-        let currScores = totalScores + currentGame.score
-        scoreLabel.text = "Wins: \(totalWins), Losses: \(totalLosses), Scores: \(currScores)"
+        scoreLabel.text = "Wins: \(totalWins), Losses: \(totalLosses)"
         treeImageView.image = UIImage(named: "Tree \(currentGame.incorrectMovesRemaining)")
+                
+        for (i, player) in players.enumerated() {
+            player.text = "Score: \(totalScores[i])"
+            player.backgroundColor = .clear
+        }
+        
+        players[currPlayer].backgroundColor = .yellow
     }
     
     func newRound() {
         if !listOfWords.isEmpty {
             let newWord = listOfWords.removeFirst()
-            currentGame = Game(word: newWord, incorrectMovesRemaining: incorrectMovesAllowed, score: 0, guessedLetters: [])
+            currentGame = Game(word: newWord, incorrectMovesRemaining: incorrectMovesAllowed, guessedLetters: [])
             enableLetterButtons(true)
         } else {
             enableLetterButtons(false)
@@ -60,7 +69,13 @@ class ViewController: UIViewController {
         sender.isEnabled = false
         let letterString = sender.configuration!.title!
         let letter = Character(letterString.lowercased())
-        currentGame.playerGuessed(letter: letter)
+        
+        if currentGame.playerGuessed(letter: letter) {
+            totalScores[currPlayer] += 1
+        } else {
+            turnPlayer()
+        }
+        
         updateGameState()
     }
     
@@ -72,13 +87,20 @@ class ViewController: UIViewController {
     
     func updateGameState() {
         if currentGame.incorrectMovesRemaining == 0 {
-            totalScores += currentGame.score
             totalLosses += 1
         } else if currentGame.word == currentGame.formattedWord {
-            totalScores += currentGame.score + 10
+            totalScores[currPlayer] += currentGame.incorrectMovesRemaining
             totalWins += 1
         } else {
             updateUI()
+        }
+    }
+    
+    func turnPlayer() {
+        currPlayer += 1
+        
+        if currPlayer >= totalScores.count {
+            currPlayer = 0
         }
     }
 }

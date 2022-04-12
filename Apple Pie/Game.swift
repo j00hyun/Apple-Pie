@@ -10,7 +10,6 @@ import Foundation
 struct Game {
     var word: String
     var incorrectMovesRemaining: Int
-    var score: Int
     var guessedLetters: [Character]
     
     var formattedWord: String {
@@ -27,13 +26,14 @@ struct Game {
         return guessedWord
     }
     
-    mutating func playerGuessed(letter: Character) {
+    mutating func playerGuessed(letter: Character) -> Bool {
         guessedLetters.append(letter)
         
-        if word.contains(letter) {
-            score += 1
-        } else {
+        if !word.contains(letter) {
             incorrectMovesRemaining -= 1
+            return false
         }
+        
+        return true
     }
 }
