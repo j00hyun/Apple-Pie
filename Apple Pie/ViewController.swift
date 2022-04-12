@@ -35,12 +35,7 @@ class ViewController: UIViewController {
     }
     
     func updateUI() {
-        var letters = [String]()
-        
-        for letter in currentGame.formattedWord {
-            letters.append(String(letter))
-        }
-        
+        let letters = currentGame.formattedWord.map { String($0) }
         let wordWithSpacing = letters.joined(separator: " ")
         
         correctWordLabel.text = wordWithSpacing
