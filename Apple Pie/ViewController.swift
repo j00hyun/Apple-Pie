@@ -80,7 +80,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     // 플레이어가 알파벳 버튼을 눌렀을 경우
     @IBAction func letterButtonPressed(_ sender: UIButton) {
         sender.isEnabled = false
-        let letterString = sender.configuration!.title!
+        let letterString = sender.currentTitle!
         let letter = Character(letterString.lowercased())
         
         // 올바른 알파벳을 선택한 경우 점수 상승
